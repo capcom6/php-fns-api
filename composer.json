@@ -1,0 +1,22 @@
+{
+    "name": "softc/fns-api",
+    "description": "Provides access to FNS API: https://api-fns.ru",
+    "type": "library",
+    "require": {
+        "guzzlehttp/guzzle": "^7.4",
+        "php": "^7.2",
+        "mpetrovich/dash": "^3.1"
+    },
+    "license": "Apache-2.0",
+    "autoload": {
+        "psr-4": {
+            "SoftC\\FnsApi\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Aleksandr Soloshenko",
+            "email": "capcom@soft-c.ru"
+        }
+    ]
+}
