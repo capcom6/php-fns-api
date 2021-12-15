@@ -49,6 +49,6 @@ class LegalEntity {
         $this->inn = $jsonObject->ИНН;
         $this->shortName = $jsonObject->НаимСокрЮЛ;
         $this->fullName = $jsonObject->НаимПолнЮЛ;
-        $this->contacts = new Contacts($jsonObject->Контакты);
+        $this->contacts = new Contacts($jsonObject->Контакты ?: new \stdClass());
     }
 }

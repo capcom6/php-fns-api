@@ -41,8 +41,8 @@ class Contacts {
     public $sites;
     
     public function __construct(object $jsonObject) {
-        $this->phones = $jsonObject->Телефон;
-        $this->emails = $jsonObject->{'e-mail'};
-        $this->sites = $jsonObject->Сайт;
+        $this->phones = $jsonObject->Телефон ?? [];
+        $this->emails = $jsonObject->{'e-mail'} ?? [];
+        $this->sites = $jsonObject->Сайт ?? [];
     }
 }
