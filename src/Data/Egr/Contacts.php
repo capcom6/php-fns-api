@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-namespace \SoftC\FnsApi\Data\Egr;
+namespace SoftC\FnsApi\Data\Egr;
 
 /**
  * Контактные данные

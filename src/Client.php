@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-namespace \SoftC\FnsApi;
+namespace SoftC\FnsApi;
 
 /**
  * Клиент API
@@ -60,9 +60,10 @@ class Client {
      * @throws \Exception
      */
     public function egrGet(string $inn) {
-        $response = $this->client->get('/api/v1/receipt/pre/create', [
+        $response = $this->client->get('egr', [
             \GuzzleHttp\RequestOptions::QUERY  => [
-                'req' => $inn
+                'req' => $inn,
+                'key' => $this->token
             ]
         ]);
         
@@ -73,11 +74,11 @@ class Client {
         $json = json_decode($response->getBody()->getContents());
         $items = $json->items;
         
-        return Dash\chain($json->items)
+        return \Dash\chain($items)
             ->map('ЮЛ')
             ->filter()
             ->map(function(object $item) {
-                return new \SoftC\FnsApi\Data\LegalEntity($item);
+                return new \SoftC\FnsApi\Data\Egr\LegalEntity($item);
             })
             ->value();
     }

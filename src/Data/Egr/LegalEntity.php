@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-namespace \SoftC\FnsApi\Data\Egr;
+namespace SoftC\FnsApi\Data\Egr;
 
 /**
  * Информация о юридическом лице
@@ -47,8 +47,8 @@ class LegalEntity {
     
     public function __construct(object $jsonObject) {
         $this->inn = $jsonObject->ИНН;
-        $this->shortName = $jsonObject->ИНН;
-        $this->fullName = $jsonObject->ИНН;
+        $this->shortName = $jsonObject->НаимСокрЮЛ;
+        $this->fullName = $jsonObject->НаимПолнЮЛ;
         $this->contacts = new Contacts($jsonObject->Контакты);
     }
 }
