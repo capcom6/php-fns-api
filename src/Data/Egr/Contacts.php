@@ -39,10 +39,10 @@ class Contacts {
      * @var array<string>
      */
     public $sites;
-    
-    public function __construct(object $jsonObject) {
-        $this->phones = $jsonObject->Телефон ?? [];
-        $this->emails = $jsonObject->{'e-mail'} ?? [];
-        $this->sites = $jsonObject->Сайт ?? [];
+
+    public function __construct(array $jsonObject) {
+        $this->phones = $jsonObject['Телефон'] ?? [];
+        $this->emails = $jsonObject['e-mail'] ?? [];
+        $this->sites = $jsonObject['Сайт'] ?? [];
     }
 }

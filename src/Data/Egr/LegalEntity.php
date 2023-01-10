@@ -44,11 +44,11 @@ class LegalEntity {
      * @var Contacts
      */
     public $contacts;
-    
-    public function __construct(object $jsonObject) {
-        $this->inn = $jsonObject->ИНН;
-        $this->shortName = $jsonObject->НаимСокрЮЛ;
-        $this->fullName = $jsonObject->НаимПолнЮЛ;
-        $this->contacts = new Contacts($jsonObject->Контакты ?: new \stdClass());
+
+    public function __construct(array $jsonObject) {
+        $this->inn = $jsonObject['ИНН'];
+        $this->shortName = $jsonObject['НаимСокрЮЛ'];
+        $this->fullName = $jsonObject['НаимПолнЮЛ'];
+        $this->contacts = new Contacts($jsonObject['Контакты'] ?? [] ?: []);
     }
 }
