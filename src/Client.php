@@ -18,6 +18,12 @@
 
 namespace SoftC\FnsApi;
 
+use Http\Client\Exception\HttpException;
+use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
+use Http\Message\MessageFactory;
+
 /**
  * Клиент API
  *
@@ -30,29 +36,30 @@ class Client {
      * Ключ доступа
      * @var string
      */
-    protected $token;
-    
+    protected string $token;
     /**
      * HTTP-клиент
-     * @var \GuzzleHttp\Client
+     * @var \Http\Client\HttpClient
      */
-    protected $client;
+    protected HttpClient $client;
+    /**
+     * Фабрика сообщений
+     * @var \Http\Message\MessageFactory
+     */
+    protected MessageFactory $messageFactory;
 
     /**
      * Ключ доступа к API
-     * @param string $token
+     * @param string $token Ключ доступа к API
+     * @param HttpClient $client HTTP-клиент, если не передан, то будет создан со значениями по-умолчанию
      */
-    public function __construct(string $token) {
+    public function __construct(string $token, ? HttpClient $client = null) {
         $this->token = $token;
-        
-        $this->client = new \GuzzleHttp\Client([
-            // Base URI is used with relative requests
-            'base_uri' => self::BASE_URI,
-            \GuzzleHttp\RequestOptions::SYNCHRONOUS => true,
-            \GuzzleHttp\RequestOptions::TIMEOUT => 30
-        ]);
+
+        $this->client = $client ?? HttpClientDiscovery::find();
+        $this->messageFactory = MessageFactoryDiscovery::find();
     }
-    
+
     /**
      * 
      * @param string $inn ОГРН или ИНН искомой компании (юридического лица или ИП)
@@ -60,26 +67,60 @@ class Client {
      * @throws \Exception
      */
     public function egrGet(string $inn) {
-        $response = $this->client->get('egr', [
-            \GuzzleHttp\RequestOptions::QUERY  => [
+        $query = http_build_query(
+            [
                 'req' => $inn,
                 'key' => $this->token
             ]
-        ]);
-        
-        if ($response->getStatusCode() !== 200) {
-            throw new \Exception($response->getReasonPhrase(), $response->getStatusCode());
+        );
+
+        $json = $this->sendRequest('GET', 'egr?' . $query);
+
+        $items = $json['items'];
+
+        $result = [];
+
+        foreach ($items as $item) {
+            if (empty($item['ЮЛ'])) {
+                continue;
+            }
+            $result[] = new \SoftC\FnsApi\Data\Egr\LegalEntity($item['ЮЛ']);
         }
-        
-        $json = json_decode($response->getBody()->getContents());
-        $items = $json->items;
-        
-        return \Dash\chain($items)
-            ->map('ЮЛ')
-            ->filter()
-            ->map(function(object $item) {
-                return new \SoftC\FnsApi\Data\Egr\LegalEntity($item);
-            })
-            ->value();
+
+        return $result;
+    }
+
+    /**
+     * Выполняет запрос к серверу
+     * @param string $method http-метод
+     * @param string $uri адрес
+     * @param object|null $payload тело запроса
+     * @throws \RuntimeException 
+     * @return array<mixed>
+     */
+    protected function sendRequest(string $method, string $uri, ?object $payload = null) {
+        $data = isset($payload) ? json_encode($payload) : null;
+        if ($data === false) {
+            throw new \RuntimeException('Не удалось сериализовать данные');
+        }
+
+        $request = $this->messageFactory->createRequest(
+            $method,
+                static::BASE_URI . $uri,
+            [],
+            $data
+        );
+        $response = $this->client->sendRequest($request);
+
+        if ($response->getStatusCode() >= 400) {
+            throw HttpException::create($request, $response);
+        }
+
+        $result = json_decode($response->getBody(), true);
+        if (!is_array($result)) {
+            throw new \RuntimeException('Не удалось десериализовать ответ');
+        }
+
+        return $result;
     }
 }
